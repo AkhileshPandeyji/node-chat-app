@@ -14,6 +14,20 @@
     <input type='password' name='password'>
     <input type='submit' >
   </form>
+  <script src='/socket.io/socket.io.js'></script>
+  <script>
+  //it starts the connection on the client side
+  //it is a connection which is persistent
+   var socket = io();
+   //registering event on the client side
+   socket.on('connect',()=>{
+    console.log('Connected to the server');
+   });
+   socket.on('disconnect',()=>{
+     console.log('server disconnected');
+   });
+
+  </script>
 </body>
 
 </html>
