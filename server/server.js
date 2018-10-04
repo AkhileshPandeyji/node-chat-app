@@ -17,7 +17,8 @@ var server = http.createServer(app);
 
 //to convert the http server to the web socket server we use socketIO(http server)
 var io = socketIO(server);
-var nemail = [];
+app.use(express.static(dpath));
+
 //registering event on the server side- on('event-builtin/custom',
 //(socket)=>{called when the event is listened})
 // on io
@@ -25,9 +26,7 @@ var nemail = [];
 //we will always write the socket.emit() and socket.on() inside io.on()
 io.on('connection',(socket)=>{
   console.log('New user connected');
-  socket.on('disconnect',()=>{
-    console.log('User disconnected');
-  });
+
   //custom event newEmail emitted from Server to the client
   // socket.emit('newEmail',{
   //   from:'andrew@abc.com',
@@ -43,20 +42,25 @@ io.on('connection',(socket)=>{
   //     socket.emit('newMessage',message);
   // });
   //two way broadcast including the one who sends the message to all others.
-  socket.on('createMessage',(message)=>{
-    io.emit('newMessage',message);
-  });
+  // socket.on('createMessage',(message)=>{
+  //   io.emit('newMessage',message);
+  // });
   //one way broadcast excluding the one who sends the message to all others.
   // socket.on('createMessage',(message)=>{
   //   socket.broadcast.emit('newMessage',message);
   // });
-  socket.emit('welcome',generateMessage('Admin','Welcome to the chat!'));
-  socket.on('joined',function(user){
-    socket.broadcast.emit('joinedu',generateMessage('Admin',`New user:${user} joined.`));
+  socket.emit('newMessage',generateMessage('Admin','Welcome to the chat!'));
+  socket.broadcast.emit('newMessage',generateMessage('Admin','New user joined.'));
+  socket.on('createMessage',(message)=>{
+    io.emit('newMessage',message);
+});
+
+  socket.on('disconnect',()=>{
+    console.log('User disconnected');
   });
 });
 
-app.use(express.static(dpath));
+
 
 
 server.listen(port,()=>{

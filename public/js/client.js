@@ -6,7 +6,7 @@
  //listening to a built-in event
  socket.on('connect',function(){
   console.log('Connected to the server');
-
+ });
   //listening to a custom event
   // socket.on('newEmail',function(email){
   //   console.log('NEW EMAIL:',email);
@@ -33,21 +33,28 @@
  //   console.log('newMessage',message);
  // });
  //one-way broadcasting - excluding the user who sends the message to all others.
- socket.emit('createMessage',{
-  from:'andrew',
-  text:'everything fine?'
-});
-socket.on('newMessage',function(message){
-  console.log('newMessage',message);
-});
-  socket.on('welcome',function(message){
-    console.log(message);
-  });
-  socket.emit('joined','Andrew');
-  socket.on('joinedu',function(message){
-      console.log(message);
-  });
+ socket.on('newMessage',function(message){
+   var li = jQuery('<li></li>');
+   li.text(`from:${message.from},message:${message.text}.`);
+   jQuery('#list').append(li);
  });
+ jQuery("#message-form").on("submit",function (event){
+   event.preventDefault();
+   socket.emit('createMessage',{
+    from:'User',
+    text:jQuery('[name=message]').val()
+  });
+
+});
+
+  // socket.on('welcome',function(message){
+  //   console.log(message);
+  // });
+  // socket.emit('joined','Andrew');
+ //  socket.on('joinedu',function(message){
+ //      console.log(message);
+ //  });
+ // });
  socket.on('disconnect',function(){
    console.log('server disconnected');
  });
