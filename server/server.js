@@ -2,7 +2,7 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const {generateMessage} = require('./../util/utils.js');
+const {generateMessage,generateLocMessage} = require('./../util/utils.js');
 var port = process.env.PORT || 3000;
 // //old manner
 // console.log(__dirname+'/../public');
@@ -53,16 +53,14 @@ io.on('connection',(socket)=>{
   socket.broadcast.emit('newMessage',generateMessage('Admin','New user joined.'));
   socket.on('createMessage',(message)=>{
     io.emit('newMessage',message);
-});
-
+      });
+  socket.on('location',function(coords){
+    io.emit('newlocmessage',generateLocMessage('User',coords.latitude,coords.longitude));
+      });
   socket.on('disconnect',()=>{
     console.log('User disconnected');
   });
 });
-
-
-
-
 server.listen(port,()=>{
   console.log('Server is up and running on port 3000');
 });

@@ -32,19 +32,20 @@
  // socket.on('newMessage',function(message){
  //   console.log('newMessage',message);
  // });
- //one-way broadcasting - excluding the user who sends the message to all others.
+
  socket.on('newMessage',function(message){
    var li = jQuery('<li></li>');
-   li.text(`from:${message.from},message:${message.text}.`);
+   li.text(`${message.from} : ${message.text}.`);
    jQuery('#list').append(li);
  });
  jQuery("#message-form").on("submit",function (event){
    event.preventDefault();
-   socket.emit('createMessage',{
+
+    socket.emit('createMessage',{
     from:'User',
     text:jQuery('[name=message]').val()
   });
-
+  jQuery('[name=message]').val('');
 });
 
   // socket.on('welcome',function(message){
@@ -55,6 +56,39 @@
  //      console.log(message);
  //  });
  // });
+ //the geolocation is inherently stored inside the
+ //navigator.geolocation object
+ //we use navigator.geolocation.getCurrentPosition()
+ //we can also use navigator.geolocation.watchPosition()
+ var locbutton = jQuery('#send-location');
+ locbutton.on('click',function(e){
+   if(!navigator.geolocation){
+     return alert('Geolocation not supported by the browser');
+   }
+   locbutton.attr('disabled','disabled');
+   locbutton.text('sending...');
+   navigator.geolocation.getCurrentPosition(function(position){
+     console.log(position);
+
+     socket.emit('location',{
+      latitude : position.coords.latitude,
+      longitude : position.coords.longitude
+     });
+locbutton.removeAttr('disabled').text('send location');
+
+   },function(){
+      locbutton.removeAttr('disabled').text('send location');
+      return alert('Unable to fetch the location');
+   })
+ });
+ socket.on('newlocmessage',function(message){
+   var li = jQuery('<li></li>');
+   var a = jQuery('<a target="_blank">My current Location</a>');
+   a.attr('href',message.url);
+   li.text(message.from+':')
+   li.append(a);
+   jQuery('#list').append(li);
+ });
  socket.on('disconnect',function(){
    console.log('server disconnected');
  });
