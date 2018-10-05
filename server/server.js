@@ -2,7 +2,7 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const {generateMessage,generateLocMessage} = require('./../util/utils.js');
+const {generateMessage,generateLocMessage,isRealString} = require('./../util/utils.js');
 var port = process.env.PORT || 3000;
 // //old manner
 // console.log(__dirname+'/../public');
@@ -49,8 +49,24 @@ io.on('connection',(socket)=>{
   // socket.on('createMessage',(message)=>{
   //   socket.broadcast.emit('newMessage',message);
   // });
-  socket.emit('newMessage',generateMessage('Admin','Welcome to the chat!'));
-  socket.broadcast.emit('newMessage',generateMessage('Admin','New user joined.'));
+  //in order to declare chat rooms we have socket.join()
+  //in order to emit events only to the room mates or users
+  //we use the folllowing syntaxes:
+  //io.to('room name').emit();
+  //socket.broadcast.to('room name').emit();
+  //socket.to('room name').emit();
+
+  socket.on('validate',function(user,callback){
+    if(!isRealString(user.display)&& !isRealString(user.room)){
+      callback('The entered input is not a valid string text');
+      }
+      else{
+        socket.join(user.room);
+        socket.emit('newMessage',generateMessage('Admin','Welcome to the chat!'));
+        socket.broadcast.to(user.room).emit('newMessage',generateMessage('Admin',`${user.display} has joined.`));
+        callback();
+      }
+  });
   socket.on('createMessage',(message)=>{
     io.emit('newMessage',message);
       });

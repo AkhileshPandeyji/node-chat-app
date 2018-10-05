@@ -13,7 +13,16 @@ var generateLocMessage = function(from,latitude,longitude){
     createdAt : moment().valueOf()
   };
 };
+var isRealString = function(text){
+  if(typeof text =='string' && text.trim().length !=0){
+    return true;
+  }
+  else{
+    return false;
+  }
+};
 module.exports={
   generateMessage,
-  generateLocMessage
+  generateLocMessage,
+  isRealString
 };
