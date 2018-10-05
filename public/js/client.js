@@ -35,7 +35,7 @@
 
  socket.on('newMessage',function(message){
    var li = jQuery('<li></li>');
-   li.text(`${message.from} : ${message.text}.`);
+   li.text(`${message.from}:${moment(message.createdAt).format('h:mm a')} : ${message.text}.---${moment(message.createdAt).fromNow()}`);
    jQuery('#list').append(li);
  });
  jQuery("#message-form").on("submit",function (event){
@@ -85,7 +85,7 @@ locbutton.removeAttr('disabled').text('send location');
    var li = jQuery('<li></li>');
    var a = jQuery('<a target="_blank">My current Location</a>');
    a.attr('href',message.url);
-   li.text(message.from+':')
+   li.text(message.from+':'+`${moment(message.createdAt).format('h:mm a')}:`)
    li.append(a);
    jQuery('#list').append(li);
  });
