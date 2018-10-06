@@ -53,7 +53,18 @@
  // socket.on('newMessage',function(message){
  //   console.log('newMessage',message);
  // });
+ socket.on('updateUserList',function(users){
+   if(users){
+   // console.log(user);
+      var ol = jQuery('<ol></ol>');
+   users.forEach(function(user){
+       var li = jQuery('<li></li>').text(user);
+       ol.append(li);
 
+        });
+      jQuery('#users').html(ol);
+    }
+ });
  socket.on('newMessage',function(message){
    var formattedTime = moment(message.createdAt).format('h:mm a');
    var template = jQuery('#message-template').html();
@@ -70,9 +81,7 @@
  });
  jQuery("#message-form").on("submit",function (event){
    event.preventDefault();
-   var user=jQuery.deparam(window.location.search);
     socket.emit('createMessage',{
-    from:user.display,
     text:jQuery('[name=message]').val()
   });
   jQuery('[name=message]').val('');

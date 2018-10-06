@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const {generateMessage,generateLocMessage,isRealString} = require('./../util/utils.js');
+var {Users} = require('./users.js');
 var port = process.env.PORT || 3000;
 // //old manner
 // console.log(__dirname+'/../public');
@@ -18,7 +19,7 @@ var server = http.createServer(app);
 //to convert the http server to the web socket server we use socketIO(http server)
 var io = socketIO(server);
 app.use(express.static(dpath));
-
+var users = new Users();
 //registering event on the server side- on('event-builtin/custom',
 //(socket)=>{called when the event is listened})
 // on io
@@ -62,19 +63,35 @@ io.on('connection',(socket)=>{
       }
       else{
         socket.join(user.room);
+        //socket.leave(room)
+        users.removeUser(socket.id);
+        users.addUser(socket.id,user.display,user.room);
+        io.to(user.room).emit('updateUserList',users.getUsersList(user.room));
         socket.emit('newMessage',generateMessage('Admin','Welcome to the chat!'));
         socket.broadcast.to(user.room).emit('newMessage',generateMessage('Admin',`${user.display} has joined.`));
+
         callback();
       }
   });
   socket.on('createMessage',(message)=>{
-    io.emit('newMessage',message);
+    var user = users.getUser(socket.id);
+    if(user && isRealString(message.text)){
+    io.to(user.room).emit('newMessage',generateMessage(user.name,message.text));
+      }
       });
   socket.on('location',function(coords){
-    io.emit('newlocmessage',generateLocMessage('User',coords.latitude,coords.longitude));
+     var user = users.getUser(socket.id);
+     if(user){
+    io.to(user.room).emit('newlocmessage',generateLocMessage(user.name,coords.latitude,coords.longitude));
+            }
       });
   socket.on('disconnect',()=>{
     console.log('User disconnected');
+    var user = users.removeUser(socket.id);
+    if(user){
+    io.to(user.room).emit('newMessage',generateMessage('Admin',`${user.name} has left.`))
+   io.to(user.room).emit('updateUserList',users.getUsersList(user.room));
+ }
   });
 });
 server.listen(port,()=>{
